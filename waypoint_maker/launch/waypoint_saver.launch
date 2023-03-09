@@ -1,6 +1,5 @@
 <!-- -->
 <launch>
-
   <arg name="input_type" default="LaneArrayTopic" />
   <arg name="save_finename" default="/tmp/saved_waypoints.csv" />
   <arg name="interval" default="1" />
@@ -20,5 +19,4 @@
     <param name="lane_csv" value="$(arg save_finename)" />
     <param name="lane_topic" value="$(arg lane_topic)" />
   </node>
-
 </launch>

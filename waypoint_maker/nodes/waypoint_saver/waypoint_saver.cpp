@@ -1,6 +1,5 @@
 /**
  * 记录采集的轨迹信息保存到本地
- * 
 */
 
 #include <ros/ros.h>
@@ -30,7 +29,6 @@ public:
 
 private:
   // functions
-
   void TwistPoseCallback(const geometry_msgs::TwistStampedConstPtr &twist_msg,
                          const geometry_msgs::PoseStampedConstPtr &pose_msg) const;
   void poseCallback(const geometry_msgs::PoseStampedConstPtr &pose_msg) const;
@@ -110,7 +108,7 @@ void WaypointSaver::TwistPoseCallback(const geometry_msgs::TwistStampedConstPtr 
   outputProcessing(pose_msg->pose, mps2kmph(twist_msg->twist.linear.x));
 }
 
-// 车辆每行驶一丁距离就向文件filename_内写入车辆位置(x, y, z)航向角和车速
+// 车辆每行驶一定距离就向文件filename_内写入车辆位置(x, y, z)航向角和车速
 // 同时调用displayMarker函数，在函数 displayMarkder中waypoint_saver_pub_发布 visualization_msgs::MarkerArray消息用来在rviz中显示车辆位置和速度信息
 void WaypointSaver::outputProcessing(geometry_msgs::Pose current_pose, double velocity) const
 {
