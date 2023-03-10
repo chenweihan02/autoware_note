@@ -28,6 +28,7 @@ void WaypointLoaderNode::initPubSub()
 void WaypointLoaderNode::run()
 {
   multi_file_path_.clear();
+  // 以','作为分隔符　将字符串line分成若干段，并将其中的空格全部去除，依次储存至字符串向量 columns中
   parseColumns(multi_lane_csv_, &multi_file_path_);
   autoware_msgs::LaneArray lane_array;
   createLaneArray(multi_file_path_, &lane_array);
@@ -236,6 +237,7 @@ FileFormat WaypointLoaderNode::checkFileFormat(const char* filename)
                                                       FileFormat::unknown);
 }
 
+// 验证文件的一致性
 bool WaypointLoaderNode::verifyFileConsistency(const char* filename)
 {
   ROS_INFO("verify...");
@@ -274,6 +276,8 @@ bool WaypointLoaderNode::verifyFileConsistency(const char* filename)
 }
 
 // 以','作为分隔符　将字符串line分成若干段，并将其中的空格全部去除，依次储存至字符串向量 columns中
+
+//将字符串lane内容分割。分别存入columns
 void parseColumns(const std::string& line, std::vector<std::string>* columns)
 {
   std::istringstream ss(line);
