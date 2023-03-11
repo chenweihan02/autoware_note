@@ -1,17 +1,5 @@
-/*
- * Copyright 2015-2019 Autoware Foundation. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/**
+ * 根据路由请求在矢量地图中寻找通往目的地的各条可行路径，并发布至话题"/lane_waypoints_array"
  */
 
 #include <sstream>
@@ -76,6 +64,8 @@ int count_lane(const lane_planner::vmap::VectorMap& vmap)
   return lcnt;
 }
 
+
+// route_cmd 回调函数
 void create_waypoint(const tablet_socket_msgs::route_cmd& msg)
 {
   std_msgs::Header header;
@@ -88,11 +78,25 @@ void create_waypoint(const tablet_socket_msgs::route_cmd& msg)
     return;
   }
 
+  /*
+  coarse_vmap
+    是根据传入create_coarse_vmap_from_route函数的 route_cmd msg构建而得的
+    是只包含无人车预计要经过的Point数据的粗略地图
+    其被当作一个粗略的导航用以在信息更完备的针对某个路网的矢量地图lane_vmap中找到
+    对应的轨迹点Point和道路Lane构建更加完善的导航地图
+  */
   lane_planner::vmap::VectorMap coarse_vmap = lane_planner::vmap::create_coarse_vmap_from_route(msg);
   if (coarse_vmap.points.size() < 2)
     return;
 
   std::vector<lane_planner::vmap::VectorMap> fine_vmaps;
+
+  /*
+    根据只有轨迹点的导航地图coarse_vmap
+    从整个路网地图lane_vmap中搜寻信息
+    构建信息完备的导航地图 fine_mostleft_vmap
+    (包含轨迹点，道路，道路限速曲率等信息)
+  */
   lane_planner::vmap::VectorMap fine_mostleft_vmap =
     lane_planner::vmap::create_fine_vmap(lane_vmap, lane_planner::vmap::LNO_MOSTLEFT, coarse_vmap,
                  search_radius, waypoint_max);
@@ -100,7 +104,13 @@ void create_waypoint(const tablet_socket_msgs::route_cmd& msg)
     return;
   fine_vmaps.push_back(fine_mostleft_vmap);
 
+
+  // count_lane 函数返回传入函数的矢量地图
+  // fine_mostleft_vmap中的最大车道数
   int lcnt = count_lane(fine_mostleft_vmap);
+
+  // 下面的for循环补充完善fine_vmaps
+  // 往里面添加以其他车道编号为基准寻找后续Lane的导航地图
   for (int i = lane_planner::vmap::LNO_MOSTLEFT + 1; i <= lcnt; ++i) {
     lane_planner::vmap::VectorMap v =
       lane_planner::vmap::create_fine_vmap(lane_vmap, i, coarse_vmap, search_radius, waypoint_max);
@@ -109,6 +119,7 @@ void create_waypoint(const tablet_socket_msgs::route_cmd& msg)
     fine_vmaps.push_back(v);
   }
 
+  // 下面从fine_vmaps中读取信息构建lane_waypoint
   autoware_msgs::LaneArray lane_waypoint;
   for (const lane_planner::vmap::VectorMap& v : fine_vmaps) {
     autoware_msgs::Lane l;
@@ -143,6 +154,8 @@ void create_waypoint(const tablet_socket_msgs::route_cmd& msg)
     }
     lane_waypoint.lanes.push_back(l);
   }
+
+  // 在话题 "/lane_waypoints_array"发布lane_waypoint
   waypoint_pub.publish(lane_waypoint);
 
   for (size_t i = 0; i < fine_vmaps.size(); ++i) {
@@ -159,13 +172,20 @@ void create_waypoint(const tablet_socket_msgs::route_cmd& msg)
   }
 }
 
+// 用以在接收到数据时更新 lane_vmap，当然要保证 all_vmap 中的 points，lanes 和 nodes 数据皆完备
+// 才可以根据 all_vmap 去生成新的 lane_vmap。
+// 接着如果接收到了路径规划的数据(cached_route.point 存在数据)，则根据 cached_route 创建导航轨迹点。
+// 随后清除已被使用的 cached_route.point 数据。
 void update_values()
 {
   if (all_vmap.points.empty() || all_vmap.lanes.empty() || all_vmap.nodes.empty())
     return;
 
+  // lane_vmap 是 VectorMap 类型数据，与 all_vmap 一致
+  // 并且 lane_planner::vmap::LNO_ALL = -1 
   lane_vmap = lane_planner::vmap::create_lane_vmap(all_vmap, lane_planner::vmap::LNO_ALL);
 
+  // cached_route 为 route_cmd 类型数据
   if (!cached_route.point.empty()) {
     create_waypoint(cached_route);
     cached_route.point.clear();
