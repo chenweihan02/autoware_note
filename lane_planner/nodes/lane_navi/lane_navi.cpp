@@ -255,3 +255,31 @@ int main(int argc, char **argv)
 
   return EXIT_SUCCESS;
 }
+/*
+
+lane_planner::vmap::VectorMap all_vmap;
+lane_planner::vmap::VectorMap lane_vmap;
+tablet_socket_msgs::route_cmd cached_route;
+
+route_sub ：订阅话题 "/route_cmd"  回调函数 create_waypoint
+  create_waypoint 的作用是根据当前车辆的位置和方向。
+  在 cached_route 变量中寻找最近的一条航迹点序列，将其转为 autoware_msgs::Lane类型
+  目的是为了生成一条适合当前车辆行驶的航迹点序列，并发布到/final_waypoints话题上，供astar_avoid或者waypoint_follower节点使用。
+
+  1. 从/vehicle_status话题中获取当前车辆的位置和方向。 TODO：在 lane_navi.cpp 184 callbackFromVehicleStatus
+  2. 遍历cached_route变量中的每一条航迹点序列，计算每一条序列的第一个航迹点与当前车辆的距离和夹角。
+  3. 找到距离最小且夹角小于90度的那一条航迹点序列，作为当前车辆的目标序列。
+  4. 从目标序列中截取一定数量（默认为200个）的航迹点，作为输出序列。
+  5. 将输出序列转换为autoware_msgs::Lane类型的消息，并添加时间戳和帧ID等信息。
+  6. 发布输出消息到/final_waypoints话题上，并返回该消息。 TODO: lane_navi.cpp 223 publishWaypoint
+
+
+point_sub、lane_sub、node_sub 回调函数 cache_point cache_lane cache_node
+  这三个回调函数
+  all_vmap.points | lane | node = msg.data;
+  update_values();
+    lane_vmap = copy (all_vmap)
+    if cached_route 存在数据    cached_route数据是 create_waypoint()函数给的
+      create_waypoint( cached_route )
+
+*/

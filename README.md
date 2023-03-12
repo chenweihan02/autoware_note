@@ -5,7 +5,6 @@
 - [x] waypoint_loader
 - [x] waypoint_replanner
 - [x] waypoint_marker_publisher
-
 - [x] lane_navi
 
 TODO: 
@@ -15,10 +14,20 @@ TODO:
 ---
 
 TODO: 
-   lane_navi可以理解为车道线规划（车道线级别的路径规划），主要作用是根据车道线信息
-   以及上层（AutowareTouch.apk）下发的航迹点（route_cmd）来进行规划。
-   获得经过设定航迹点（可获得多条不同车道上的路径）
-   ！！！需要手动实现 通过lane_navi发送route_cmd消息、
+
+lane_navi可以理解为车道线规划（车道线级别的路径规划），主要作用是根据车道线信息
+以及上层（AutowareTouch.apk）下发的航迹点（route_cmd）来进行规划。
+获得经过设定航迹点（可获得多条不同车道上的路径）
+！！！需要手动实现 通过lane_navi发送route_cmd消息、
+
+
+lane_navi节点会订阅/waypoint_saver/loaded_waypoints话题，并在回调函数中更新cached_route变量。
+每次收到新的航迹点时，它会清空cached_route变量，并将新的航迹点序列添加到cached_route变量中。
+
+然后，lane_navi节点会根据当前车辆的位置和方向，在cached_route变量中找到最近的一条航迹点序列，
+并将其发布到/final_waypoints话题上。
+这个话题是由astar_avoid或者waypoint_follower节点订阅的，它们会根据这些航迹点进行规划和控制。
+
 
 ---
 
