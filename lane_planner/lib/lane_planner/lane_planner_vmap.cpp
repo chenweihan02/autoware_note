@@ -421,18 +421,21 @@ bool is_straight_dtlane(const vector_map::DTLane& dtlane)
   return (dtlane.apara == 0 && dtlane.r == RADIUS_MAX);
 }
 
+// 判断是不是弯道
 bool is_curve_dtlane(const vector_map::DTLane& dtlane)
 {
   return (dtlane.apara == 0 && dtlane.r != RADIUS_MAX);
 }
 
 // XXX better way?
+// 判断是否是十字路口
 bool is_crossroad_dtlane(const vector_map::DTLane& dtlane)
 {
   // take crossroad for 10 radius or less
   return (fabs(dtlane.r) <= 10);
 }
 
+// 判断是否道路回旋
 bool is_clothoid_dtlane(const vector_map::DTLane& dtlane)
 {
   return (dtlane.apara != 0);

@@ -6,9 +6,10 @@
 - [x] waypoint_replanner
 - [x] waypoint_marker_publisher
 - [x] lane_navi
+- [x] lane_rule 
 
 TODO: 
-- [ ] lane_rule
+
 
 
 ---
@@ -61,7 +62,7 @@ vector_map矢量化地图的生成方法 https://blog.csdn.net/qq_35635374/artic
    - 定义车辆行驶的车道，它由两个Node组成。每段lane的长度即是before node和forward node之间的距离
    - 地图中的lane代表小车形式的轨迹路径，一般是道路的中心线，在显示道路中是没有的，是靠人为规划出来的
 
-1. Line
+6. Line
    - Line 表示线段，用 lid 作为识别编号；
    - 两个 Point 的连线即为 Line，bpid 和 fpid指的是线段的两个端点 Point 的识别编号；
    - blid 和 flid 表示线段之间的关联关系，分别是上一条和下一条 Line 的识别编号。

@@ -65,7 +65,7 @@ int count_lane(const lane_planner::vmap::VectorMap& vmap)
 }
 
 
-// route_cmd 回调函数
+// route_cmd 回调函数  update_values调用
 void create_waypoint(const tablet_socket_msgs::route_cmd& msg)
 {
   std_msgs::Header header;

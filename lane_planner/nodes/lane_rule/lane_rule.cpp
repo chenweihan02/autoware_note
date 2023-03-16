@@ -249,28 +249,44 @@ std::vector<size_t> create_stop_indexes(const lane_planner::vmap::VectorMap& vma
   return stop_indexes;
 }
 
+// 对车速进行修正。
 autoware_msgs::Lane apply_stopline_acceleration(const autoware_msgs::Lane& lane, double acceleration,
                                                 double stopline_search_radius, size_t ahead_cnt, size_t behind_cnt)
 {
   autoware_msgs::Lane l = lane;
 
+  // 查找l中所有停止点（停止线跟前的轨迹点）的下标
   std::vector<size_t> indexes = create_stop_indexes(lane_vmap, l, stopline_search_radius);
   if (indexes.empty())
     return l;
 
   for (const size_t i : indexes)
+    // 修正l中轨迹点的速度，首先固定l内下标在 [i, i + behind_cnt + 1)范围内的轨迹点速度都为0
+    // 随后根据加速情况下的运动学公式修正后面轨迹点的速度
     l = apply_acceleration(l, acceleration, i, behind_cnt + 1, 0);
-
+  // 反转 l.waypoints中的所有元素
   std::reverse(l.waypoints.begin(), l.waypoints.end());
 
   std::vector<size_t> reverse_indexes;
   for (const size_t i : indexes)
+    // 记录反转后的l.waypoints中的停止点的下标，此时下标是从大到小
     reverse_indexes.push_back(l.waypoints.size() - i - 1);
   std::reverse(reverse_indexes.begin(), reverse_indexes.end());
 
   for (const size_t i : reverse_indexes)
-    l = apply_acceleration(l, acceleration, i, ahead_cnt + 1, 0);
+  // 反转后再调用 apply_acceleration
+  // 总体而言，这里与上面调用 apply_acceleration 函数的情况相反 
+  // 此处对于停止点和还未到停止点前的一些轨迹点令车静止
+  // 而这些轨迹点更前面的轨迹点根据减速到达停止点修正原车速
 
+    l = apply_acceleration(l, acceleration, i, ahead_cnt + 1, 0);
+  // 上面两次调用 apply_acceleration 函数
+  // 对车速进行修正，首先以停车点为中心修正附近轨迹点车速为 0
+  // 接着运用匀减速/匀加速动力学方程修正
+  // 匀减速接近/匀加速离开停车点过程中的车速
+
+
+  // 恢复 l.waypoints 中轨迹点的顺序
   std::reverse(l.waypoints.begin(), l.waypoints.end());
 
   return l;
@@ -283,8 +299,11 @@ bool is_fine_vmap(const lane_planner::vmap::VectorMap& fine_vmap, const autoware
 
   for (size_t i = 0; i < fine_vmap.points.size(); ++i)
   {
+    // 要先用create_vector_map_point函数进行转换
+    // 因为矢量地图内轨迹点坐标与geometry_msgs::Point类型的轨迹点x-y坐标是反向的
     vector_map::Point point = lane_planner::vmap::create_vector_map_point(lane.waypoints[i].pose.pose.position);
     double distance = hypot(fine_vmap.points[i].bx - point.bx, fine_vmap.points[i].ly - point.ly);
+    // 对应的轨迹点应当是在同一位置
     if (distance > 0.1)
       return false;
   }
@@ -368,6 +387,18 @@ std_msgs::ColorRGBA create_color(int index)
 }
 #endif  // DEBUG
 
+// waypoint_sub 回调函数  config_parameter  update_values调用
+/*
+lane_rule: create_waypoint接收的是autoware_msgs::LaneArray
+lane_navi: create_waypoint接收的是table_socket_msgs::route_cmd
+
+lane_rule：waypoint_sub的回调函数，话题是 "lane_waypoints_array"
+该话题的发布者在lane_navi waypoint_pub
+
+lane_navi根据路由指令在矢量地图内搜索到达目的地的路径并在话题 lane_waypoints_array上发布
+被节点lane_rule监听后对路径进行修正
+
+*/
 void create_waypoint(const autoware_msgs::LaneArray& msg)
 {
   std_msgs::Header header;
@@ -379,6 +410,7 @@ void create_waypoint(const autoware_msgs::LaneArray& msg)
   cached_waypoint.id = msg.id;
   for (const autoware_msgs::Lane& l : msg.lanes)
     cached_waypoint.lanes.push_back(create_new_lane(l, header));
+
   if (all_vmap.points.empty() || all_vmap.lanes.empty() || all_vmap.nodes.empty() || all_vmap.stoplines.empty() ||
       all_vmap.dtlanes.empty())
   {
@@ -397,7 +429,7 @@ void create_waypoint(const autoware_msgs::LaneArray& msg)
   for (size_t i = 0; i < msg.lanes.size(); ++i)
   {
     autoware_msgs::Lane lane = create_new_lane(msg.lanes[i], header);
-
+    // 创建只有轨迹点的粗略导航地图
     lane_planner::vmap::VectorMap coarse_vmap = lane_planner::vmap::create_coarse_vmap_from_lane(lane);
     if (coarse_vmap.points.size() < 2)
     {
@@ -407,10 +439,15 @@ void create_waypoint(const autoware_msgs::LaneArray& msg)
 
     lane_planner::vmap::VectorMap fine_vmap = lane_planner::vmap::create_fine_vmap(
         lane_vmap, lane_planner::vmap::LNO_ALL, coarse_vmap, search_radius, waypoint_max);
+    
+    // is_fine_vmap函数根据lane中的数据对比fine_vmap中
+    // 储存的数据 判断fine_vmap是否正确生成
     if (fine_vmap.points.size() < 2 || !is_fine_vmap(fine_vmap, lane))
     {
       traffic_waypoint.lanes.push_back(lane);
       green_waypoint.lanes.push_back(lane);
+      // apply_stopline_acceleration 函数对传入函数的
+      // lane里面接近停止点和离开停止点的轨迹点速度进行修正
       lane = apply_stopline_acceleration(lane, config_acceleration, config_stopline_search_radius,
                                          config_number_of_zeros_ahead, config_number_of_zeros_behind);
       red_waypoint.lanes.push_back(lane);
@@ -419,6 +456,7 @@ void create_waypoint(const autoware_msgs::LaneArray& msg)
 
     for (size_t j = 0; j < lane.waypoints.size(); ++j)
     {
+      // 根据当前轨迹点所处的lane 是否为弯道或者回旋道等情况降低车速
       lane.waypoints[j].twist.twist.linear.x *= create_reduction(fine_vmap, j);
       if (fine_vmap.dtlanes[j].did >= 0)
       {
@@ -427,15 +465,20 @@ void create_waypoint(const autoware_msgs::LaneArray& msg)
     }
 
     /* velocity smoothing */
+    // 光滑速度变化
     for (int k = 0; k < config_number_of_smoothing_count; ++k)
     {
       autoware_msgs::Lane temp_lane = lane;
+      // 检查轨迹数目
       if (lane.waypoints.size() >= 3)
       {
+        // 遍历lane中的轨迹点
         for (size_t j = 1; j < lane.waypoints.size() - 1; ++j)
         {
           if (lane.waypoints.at(j).twist.twist.linear.x != 0)
           {
+            // 顺滑速度的方式：以下标为j的轨迹点为中心
+            // 将三个连续点速度取均值作为下标为j的轨迹点的速度
             lane.waypoints[j].twist.twist.linear.x =
                 (temp_lane.waypoints.at(j - 1).twist.twist.linear.x + temp_lane.waypoints.at(j).twist.twist.linear.x +
                  temp_lane.waypoints.at(j + 1).twist.twist.linear.x) /
@@ -445,11 +488,17 @@ void create_waypoint(const autoware_msgs::LaneArray& msg)
       }
     }
 
+    // apply_crossroad_acceleration 函数对传入的函数的lane里面
+    // 接近交叉口起始点和离开交叉口末尾点的轨迹点速度进行修正
     lane = apply_crossroad_acceleration(lane, config_acceleration);
 
     traffic_waypoint.lanes.push_back(lane);
     green_waypoint.lanes.push_back(lane);
 
+    // 此处 apply_crossroad_acceleration 函数与前面的 为同名函数
+    // 前面的 apply_crossroad_acceleration 函数因为缺少导航矢量地图 fine_vmap
+    // 需要在全局路网地图 lane_vmap中寻找停止点，
+    // 而此处的 apply_crossroad_acceleration 函数直接借助 fine_vmap即可找到行车路径上的停止点
     lane = apply_stopline_acceleration(lane, config_acceleration, fine_vmap, config_number_of_zeros_ahead,
                                        config_number_of_zeros_behind);
 
@@ -469,9 +518,14 @@ void create_waypoint(const autoware_msgs::LaneArray& msg)
 
   traffic_pub.publish(traffic_waypoint);
   red_pub.publish(red_waypoint);
+  // rad_waypoint 是经过 apply_crossroad_acceleration 函数处理过的
+  // 应用于红灯时在停车线减速停车的场景
   green_pub.publish(green_waypoint);
 }
 
+/*
+相比于lane_navi多了对dtlanes和 stopline的判断
+*/
 void update_values()
 {
   if (all_vmap.points.empty() || all_vmap.lanes.empty() || all_vmap.nodes.empty() || all_vmap.stoplines.empty() ||
@@ -483,11 +537,16 @@ void update_values()
   curve_radius_min = lane_planner::vmap::RADIUS_MAX;
   crossroad_radius_min = lane_planner::vmap::RADIUS_MAX;
   clothoid_radius_min = lane_planner::vmap::RADIUS_MAX;
+
+  // 
+
   for (const vector_map::DTLane& d : lane_vmap.dtlanes)
   {
     double radius_min = fabs(d.r);
+    // 弯道
     if (lane_planner::vmap::is_curve_dtlane(d))
     {
+      // 十字路口
       if (lane_planner::vmap::is_crossroad_dtlane(d))
       {
         if (radius_min < crossroad_radius_min)
@@ -499,6 +558,7 @@ void update_values()
           curve_radius_min = radius_min;
       }
     }
+    // 道路回旋
     else if (lane_planner::vmap::is_clothoid_dtlane(d))
     {
       if (radius_min < clothoid_radius_min)
