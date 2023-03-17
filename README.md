@@ -7,10 +7,15 @@
 - [x] waypoint_marker_publisher
 - [x] lane_navi
 - [x] lane_rule 
+- [x] lane_stop
 
+- [x] ndt_mapping
 TODO: 
 
-
+- [ ] ndt_matching
+- [ ] lane_select
+- [ ] astar_avoid
+- [ ] velocity_set
 
 ---
 
@@ -35,9 +40,30 @@ lane_navi节点会订阅/waypoint_saver/loaded_waypoints话题，并在回调函
 TODO:
 
 自动驾驶实战系列(一)——构建点云地图的关键技术：http://49.235.237.45/2019/10/11/31ndt-map/
+
 Autoware planning模块学习笔记（二）：路径规划（4）- 节点lane_navi：https://blog.csdn.net/xiaoxiao123jun/article/details/105227743
 
 vector_map矢量化地图的生成方法 https://blog.csdn.net/qq_35635374/article/details/120920983 
+
+
+自动驾驶系列：激光雷达建图和定位(NDT) https://zhuanlan.zhihu.com/p/77623762
+
+【Autoware】之ndt_mapping理论公式及代码对比 https://blog.csdn.net/qq_39537898/article/details/115439552
+
+NDT（Normal Distributions Transform）算法原理与公式推导  https://www.cnblogs.com/21207-iHome/p/8039741.html
+
+https://epsavlc.github.io/about.html
+
+https://blog.csdn.net/weixin_44570248/article/details/118463105
+
+lanelet
+vectorMap区别
+
+高精地图。
+
+SLAM发展过程。
+区别
+
 
 ---
 ---

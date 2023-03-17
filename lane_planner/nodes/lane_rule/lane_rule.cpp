@@ -1,5 +1,5 @@
 /**
- * 
+ * 对节点 lane_navi 发布在话题“/lane_waypoints_array”上的规划路径在轨迹点速度方面进一步修正，为红灯时在停车线内减速停车等场景提供支持
  */
 
 // #define DEBUG

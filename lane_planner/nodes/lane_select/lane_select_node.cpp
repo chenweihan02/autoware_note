@@ -1,17 +1,7 @@
 /*
- * Copyright 2015-2019 Autoware Foundation. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+判断当前车道，同时规划从当前车道切换至其他车道的轨迹，
+接着根据话题"state"中的驾驶状态(是否需要换道)发布当前车道数/
+换道轨迹数据至话题"base_waypoints"供其他节点继续规划。
  */
 
 // ROS includes
