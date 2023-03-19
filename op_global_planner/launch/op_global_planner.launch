@@ -1,0 +1,42 @@
+<!-- -->
+<launch>
+  <arg name="pathDensity"           default="0.75" /> <!-- distance between each two waypoints-->
+  <arg name="enableSmoothing"         default="true" /> <!-- 1 or 0 -->
+  <arg name="enableLaneChange"         default="false" /> <!-- 1 or 0 -->
+  <arg name="enableRvizInput"         default="false" /> <!-- 1 or 0 -->
+  <arg name="enableReplan"            default="true" /> <!-- 1 or 0 -->  
+  <arg name="velocitySource"          default="1" /> <!-- read velocities from (0- Odometry, 1- autoware current_velocities, 2- car_info) "" -->
+  <arg name="mapSource"             default="0" /> <!-- Autoware=0, Vector Map Folder=1, kml file=2 -->
+  <arg name="mapFileName"           default="" /> <!-- incase of kml map source -->
+  <arg name="enableDynamicMapUpdate"       default="false" />  
+  
+<node pkg="op_global_planner" type="op_global_planner" name="op_global_planner" output="screen">
+    <!-- 控制生成的全局路径中航点之间的距离，每两个航路点之间的距离，单位是米。 -->
+    <param name="pathDensity"         value="$(arg pathDensity)" /> 
+
+    <!-- 启用或禁用对全局路径进行平滑处理，以减少转弯半径 -->
+    <param name="enableSmoothing"       value="$(arg enableSmoothing)" />
+
+    <!-- 启用或禁用在路网中进行车道变换的功能 -->
+    <param name="enableLaneChange"       value="$(arg enableLaneChange)" />
+
+    <!-- 启用或禁用从RViz中输入起始位置和目标位置的功能 -->
+    <param name="enableRvizInput"       value="$(arg enableRvizInput)" />
+
+    <!-- 启用或禁用在目标位置改变时重新规划全局路径的功能 -->
+    <param name="enableReplan"         value="$(arg enableReplan)" />      
+    
+    <!-- 选择速度信息的来源，可以是地图（map）或者传感器（sensor）   -->
+    <param name="velocitySource"       value="$(arg velocitySource)" />
+
+    <!-- 选择地图信息的来源，可以是矢量地图（vector_map）或者点云地图（point_cloud_map） -->
+    <param name="mapSource"         value="$(arg mapSource)" />
+
+    <!-- 指定矢量地图文件的名称和路径 -->
+    <param name="mapFileName"         value="$(arg mapFileName)" />
+    
+    <!-- 启用或禁用动态地图更新的功能，即在运行时根据传感器数据更新地图中的障碍物信息。 -->
+    <param name="enableDynamicMapUpdate"   value="$(arg enableDynamicMapUpdate)" />
+          
+  </node> 
+</launch>

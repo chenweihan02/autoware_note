@@ -8,14 +8,29 @@
 - [x] lane_navi
 - [x] lane_rule 
 - [x] lane_stop
-
 - [x] ndt_mapping
+- [x] op_global_planner
 TODO: 
+
+- [ ] op_local_planner
 
 - [ ] ndt_matching
 - [ ] lane_select
 - [ ] astar_avoid
 - [ ] velocity_set
+
+---
+
+TODO:
+
+https://blog.csdn.net/qq_39537898/article/details/118436448
+
+https://github.com/autowarefoundation/autoware_ai/issues/795
+
+https://answers.ros.org/question/390380/autoware-hatem-1130-object-avoidance-not-working/
+
+https://answers.ros.org/question/357918/global-planning-with-autoware-114-and-osm-vector-map/
+
 
 ---
 

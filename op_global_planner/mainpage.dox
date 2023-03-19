@@ -1,0 +1,19 @@
+/**
+
+\mainpage
+
+\htmlinclude manifest.html
+
+\b way_planner is a global planning node that enable generating global path from start position to goal position , 
+\b this global path has lane change information, and the node will return traffic signs, lights , lines information which related to the global path. 
+\b user can also pass list of junction nodes which will be used to generate global path from start position throught all node points to the last node point as goal.
+
+
+planner是全局规划节点，其能够生成从起始位置到目标位置的全局路径，
+
+该全局路径具有变道信息，节点将返回与全局路径相关的交通标志、指示灯、线路信息。
+
+用户还可以传递连接节点列表，该列表将用于生成从开始位置穿过所有节点点到最后一个节点点的全局路径作为目标。
+
+
+**/
