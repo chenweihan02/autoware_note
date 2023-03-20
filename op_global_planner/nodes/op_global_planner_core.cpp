@@ -265,6 +265,7 @@ namespace GlobalPlanningNS
     return false;
   }
 
+  // 蓝色的Nav Goal
   void GlobalPlanner::VisualizeAndSend(const std::vector<std::vector<PlannerHNS::WayPoint>> generatedTotalPaths)
   {
     autoware_msgs::LaneArray lane_array;
@@ -306,6 +307,7 @@ namespace GlobalPlanningNS
   }
 
   // 可视化目的地
+  // 可视化全局路径规划器搜索空间中的所有目标点
   void GlobalPlanner::VisualizeDestinations(std::vector<PlannerHNS::WayPoint> &destinations, const int &iSelected)
   {
     visualization_msgs::MarkerArray goals_array;
@@ -523,6 +525,7 @@ namespace GlobalPlanningNS
           if (bNewPlan)
           {
             bMakeNewPlan = false;
+            // 蓝色的路径
             VisualizeAndSend(m_GeneratedTotalPaths);
           }
         }
