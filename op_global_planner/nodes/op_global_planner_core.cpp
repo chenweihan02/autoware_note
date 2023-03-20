@@ -224,6 +224,7 @@ namespace GlobalPlanningNS
   */ 
 
   // TODO 该函数的作用，　根据Main Loop的结果　该函数 return false
+  // 生成路径点，然后给 visual展示？
   bool GlobalPlanner::GenerateGlobalPlan(
                                   PlannerHNS::WayPoint &startPoint, 
                                   PlannerHNS::WayPoint &goalPoint, 
@@ -538,13 +539,18 @@ namespace GlobalPlanningNS
           // true
           bool bNewPlan = GenerateGlobalPlan(m_CurrentPose, goalPoint, m_GeneratedTotalPaths);
           // TODO　判断是否进入这个循环
+          // 一启动的时候未进入，发送 发送goal后进入
+
+
+          // TODO　从哪里读取了　直接运行launch文件的话，默认有Goal
           if (bNewPlan)
           {
             // ？？？
             ROS_INFO("CWH Main Loop bNewPlan is true");
 
             bMakeNewPlan = false;
-            // 蓝色的路径????
+            // 蓝色的路径
+            // 只能进入一次这里？　发送goal　未响应
             VisualizeAndSend(m_GeneratedTotalPaths);
           }
           else 
@@ -553,7 +559,7 @@ namespace GlobalPlanningNS
           }
         }
         // 路径上的绿色箭头 可视化全局路径规划器搜索空间中的所有目标点
-        VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);
+        // VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);
       }
 
       loop_rate.sleep();

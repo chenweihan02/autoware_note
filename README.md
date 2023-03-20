@@ -2,7 +2,7 @@
 编译
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
 
-colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select detected_objects_visualizer
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select op_global_planner
 
 
 op_global_planner BACKUP
