@@ -1,3 +1,16 @@
+
+编译
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select detected_objects_visualizer
+
+
+op_global_planner BACKUP
+https://paste.nugine.xyz/uufshu2q
+
+
+---
+
 # autoware_note
 
 - [x] waypoint_saver
@@ -10,6 +23,8 @@
 - [x] lane_stop
 - [x] ndt_mapping
 - [x] op_global_planner
+
+
 TODO: 
 
 - [ ] op_local_planner
@@ -17,6 +32,126 @@ TODO:
 - [ ] lane_select
 - [ ] astar_avoid
 - [ ] velocity_set
+
+---
+
+TODO:
+
+
+[ INFO] [1679279706.208430329]: Received Goal Pose
+[ INFO] [1679279706.209502506]: CWH Main Loop is false
+Goal Found, LaneID: 11, Distance : 0, Angle: 0
+
+Info: PlannerH -> Plan (A) Path With Size (17), MultiPaths No(1) Extraction Time :
+New DP Path -> 32
+[ INFO] [1679279706.248216545]: CWH Main Loop is true
+
+再次发送，receive　到了
+CWH Main Loop is true
+
+页面里面的蓝色路径没有更新？　也有可能已经更新了　需要刷新一下rviz
+
+
+
+通过2D Nav goal 发送的目标只能接收一次
+
+```
+[ INFO] [1679276743.239217322]: Received Goal Pose
+Goal Found, LaneID: 10, Distance : 0, Angle: 0
+
+Info: PlannerH -> Plan (A) Path With Size (14), MultiPaths No(1) Extraction Time :
+New DP Path -> 25
+```
+
+
+**op_destinations_rviz　/ pub_GoalsListRviz**
+
+```
+markers: 
+  - 
+    header: 
+      seq: 0
+      stamp: 
+        secs: 0
+        nsecs:         0
+      frame_id: "map"
+    ns: "HMI_Destinations"
+    id: 0
+    type: 9
+    action: 0
+    pose: 
+      position: 
+        x: 19.3986625671
+        y: 9.86745834351
+        z: 0.0
+      orientation: 
+        x: 0.0
+        y: 0.0
+        z: 0.668461497866
+        w: 0.743746748477
+    scale: 
+      x: 3.25
+      y: 3.25
+      z: 3.25
+    color: 
+      r: 1.0
+      g: 0.0
+      b: 0.0
+      a: 0.899999976158
+    lifetime: 
+      secs: 0
+      nsecs:         0
+    frame_locked: False
+    points: []
+    colors: []
+    text: "G"
+    mesh_resource: ''
+    mesh_use_embedded_materials: False
+```
+
+**global_waypoints_rviz / pub_PathsRviz**
+
+```
+- 
+    header: 
+      seq: 0
+      stamp: 
+        secs: 0
+        nsecs:         0
+      frame_id: "map"
+    ns: "global_velocity_lane_1"
+    id: 24
+    type: 9
+    action: 0
+    pose: 
+      position: 
+        x: 18.9637550053
+        y: 13.5829206755
+        z: 0.2
+      orientation: 
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 0.0
+    scale: 
+      x: 0.0
+      y: 0.0
+      z: 0.0
+    color: 
+      r: 1.0
+      g: 1.0
+      b: 1.0
+      a: 0.899999976158
+    lifetime: 
+      secs: 0
+      nsecs:         0
+    frame_locked: False
+    points: []
+    colors: []
+    text: "20"
+    mesh_resource: ''
+    mesh_use_embedded_materials: False
+```
 
 ---
 

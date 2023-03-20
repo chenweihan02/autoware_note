@@ -165,11 +165,15 @@ namespace GlobalPlanningNS
   }
 
   // EnableRvizInput
+  // 好像只有一次receive
 
   void GlobalPlanner::callbackGetGoalPose(const geometry_msgs::PoseStampedConstPtr &msg)
   {
     PlannerHNS::WayPoint wp = PlannerHNS::WayPoint(msg->pose.position.x + m_OriginPos.position.x, msg->pose.position.y + m_OriginPos.position.y, msg->pose.position.z + m_OriginPos.position.z, tf::getYaw(msg->pose.orientation));
     m_GoalsPos.push_back(wp);
+
+    ROS_INFO("CWH Goal %d m_GoalsPos size", m_GoalsPos.size());
+
     ROS_INFO("Received Goal Pose");
   }
 
@@ -214,11 +218,16 @@ namespace GlobalPlanningNS
   }
 
   /*
-    GenerateGlobalPlan 函数接受起点和终点位置作为输入，并使用基于代价地图的A算法计算出一组可行的全局路径。
-    GenerateGlobalPlan 函数在计算全局路径时，会优先考虑代价地图中的低代价区域和最优路径，以保证路径的平滑性和可行性。
+    该 函数接受起点和终点位置作为输入，并使用基于代价地图的A算法计算出一组可行的全局路径。
+    该 函数在计算全局路径时，会优先考虑代价地图中的低代价区域和最优路径，以保证路径的平滑性和可行性。
     生成的全局路径会存储在 m_GeneratedTotalPaths 变量中，供后续的路径跟踪或控制模块使用。
   */ 
-  bool GlobalPlanner::GenerateGlobalPlan(PlannerHNS::WayPoint &startPoint, PlannerHNS::WayPoint &goalPoint, std::vector<std::vector<PlannerHNS::WayPoint>> &generatedTotalPaths)
+
+  // TODO 该函数的作用，　根据Main Loop的结果　该函数 return false
+  bool GlobalPlanner::GenerateGlobalPlan(
+                                  PlannerHNS::WayPoint &startPoint, 
+                                  PlannerHNS::WayPoint &goalPoint, 
+                                  std::vector<std::vector<PlannerHNS::WayPoint>> &generatedTotalPaths)
   {
     std::vector<int> predefinedLanesIds;
     double ret = 0;
@@ -491,11 +500,14 @@ namespace GlobalPlanningNS
       if (m_GoalsPos.size() > 0)
       {
         // m_GeneratedTotalPaths 存储当前计算出的全局路径规划结果中的所有路
+        // 二位数组　存放　WayPoints
         if (m_GeneratedTotalPaths.size() > 0 && m_GeneratedTotalPaths.at(0).size() > 3)
         {
           // 在目标位置改变时重新规划全局路径的功能
           if (m_params.bEnableReplanning)
           {
+            // 有一直在运行．
+            // ROS_INFO("CWH Main Loop is replanning");
             PlannerHNS::RelativeInfo info;
             // 用于计算车辆与前方障碍物之间的相对信息
             bool ret = PlannerHNS::PlanningHelpers::GetRelativeInfoRange(m_GeneratedTotalPaths, m_CurrentPose, 0.75, info);
@@ -514,21 +526,33 @@ namespace GlobalPlanningNS
           }
         }
         else
+        {
           bMakeNewPlan = true;
+        }
 
         if (bMakeNewPlan || (m_params.bEnableDynamicMapUpdate && UtilityHNS::UtilityH::GetTimeDiffNow(m_ReplnningTimer) > REPLANNING_TIME))
         {
           UtilityHNS::UtilityH::GetTickCount(m_ReplnningTimer);
           PlannerHNS::WayPoint goalPoint = m_GoalsPos.at(m_iCurrentGoalIndex);
+          
+          // true
           bool bNewPlan = GenerateGlobalPlan(m_CurrentPose, goalPoint, m_GeneratedTotalPaths);
-
+          // TODO　判断是否进入这个循环
           if (bNewPlan)
           {
+            // ？？？
+            ROS_INFO("CWH Main Loop bNewPlan is true");
+
             bMakeNewPlan = false;
-            // 蓝色的路径
+            // 蓝色的路径????
             VisualizeAndSend(m_GeneratedTotalPaths);
           }
+          else 
+          {
+            ROS_INFO("CWH Main Loop bNewPlan is false");
+          }
         }
+        // 路径上的绿色箭头 可视化全局路径规划器搜索空间中的所有目标点
         VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);
       }
 
