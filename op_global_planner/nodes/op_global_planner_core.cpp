@@ -512,6 +512,7 @@ namespace GlobalPlanningNS
             PlannerHNS::RelativeInfo info;
             // 用于计算车辆与前方障碍物之间的相对信息
             bool ret = PlannerHNS::PlanningHelpers::GetRelativeInfoRange(m_GeneratedTotalPaths, m_CurrentPose, 0.75, info);
+            
             if (ret == true && info.iGlobalPath >= 0 && info.iGlobalPath < m_GeneratedTotalPaths.size() && info.iFront > 0 && info.iFront < m_GeneratedTotalPaths.at(info.iGlobalPath).size())
             {
               double remaining_distance = m_GeneratedTotalPaths.at(info.iGlobalPath).at(m_GeneratedTotalPaths.at(info.iGlobalPath).size() - 1).cost - (m_GeneratedTotalPaths.at(info.iGlobalPath).at(info.iFront).cost + info.to_front_distance);
@@ -542,10 +543,9 @@ namespace GlobalPlanningNS
           // 一启动的时候未进入，发送 发送goal后进入
 
 
-          // TODO　从哪里读取了　直接运行launch文件的话，默认有Goal
+          // TODO　从哪里读取了Goal　直接运行launch文件的话，默认有Goal
           if (bNewPlan)
           {
-            // ？？？
             ROS_INFO("CWH Main Loop bNewPlan is true");
 
             bMakeNewPlan = false;
@@ -559,7 +559,7 @@ namespace GlobalPlanningNS
           }
         }
         // 路径上的绿色箭头 可视化全局路径规划器搜索空间中的所有目标点
-        // VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);
+        VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);
       }
 
       loop_rate.sleep();

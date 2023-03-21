@@ -26,6 +26,9 @@ PlanningHelpers::~PlanningHelpers()
 {
 }
 
+// 
+
+
 bool PlanningHelpers::GetRelativeInfoRange(const std::vector<std::vector<WayPoint> >& trajectories, const WayPoint& p,const double& searchDistance, RelativeInfo& info)
 {
   if(trajectories.size() == 0) return false;
