@@ -3,6 +3,7 @@
         "deque": "cpp",
         "string": "cpp",
         "vector": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "thread": "cpp"
     }
 }

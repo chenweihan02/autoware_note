@@ -9,6 +9,7 @@ op_global_planner BACKUP
 https://paste.nugine.xyz/uufshu2q
 
 
+
 ---
 
 # autoware_note
@@ -32,6 +33,21 @@ TODO:
 - [ ] lane_select
 - [ ] astar_avoid
 - [ ] velocity_set
+
+---
+
+CWH:　cmd
+
+脱离 runtime 导入pcd地图文件
+```
+roslaunch map_file points_map_loader.launch sceme_num:=noupdate parea_list:=None path_pcd:=/home/cwh/Desktop/sim_white/autoware-220302.pcd
+```
+
+导入vector　map文件
+```
+['rosrun', 'map_file', 'vector_map_loader', '/home/cwh/Desktop/sim_white/sim_white/dtlane.csv', '/home/cwh/Desktop/sim_white/sim_white/lane.csv', '/home/cwh/Desktop/sim_white/sim_white/line.csv', '/home/cwh/Desktop/sim_white/sim_white/node.csv', '/home/cwh/Desktop/sim_white/sim_white/point.csv', '/home/cwh/Desktop/sim_white/sim_white/whiteline.csv']
+```
+
 
 ---
 
