@@ -30,6 +30,7 @@ TODO:
 - [ ] ndt_matching
 - [ ] 对比ndt_mapping和ndt_matching 
 - [ ] 对比ndt_matching | nat_mapping 和 simple_ndt_slam区别，增加内容
+- [ ] 替换LIO-SAM
 - [ ] lane_select
 - [ ] astar_avoid
 - [ ] velocity_set
