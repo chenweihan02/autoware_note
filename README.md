@@ -8,8 +8,6 @@ colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select op_global
 op_global_planner BACKUP
 https://paste.nugine.xyz/uufshu2q
 
-
-
 ---
 
 # autoware_note
@@ -30,6 +28,8 @@ TODO:
 
 - [ ] op_local_planner
 - [ ] ndt_matching
+- [ ] 对比ndt_mapping和ndt_matching 
+- [ ] 对比ndt_matching | nat_mapping 和 simple_ndt_slam区别，增加内容
 - [ ] lane_select
 - [ ] astar_avoid
 - [ ] velocity_set
